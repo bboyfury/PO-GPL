@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --cpus-per-task=4
-#SBATCH --time=6-12:00:00
+#SBATCH --time=06:00:00
 #SBATCH --mem-per-cpu=4G
 #SBATCH --gres=gpu:1
 #SBATCH --output=logs/%x_%j.out
