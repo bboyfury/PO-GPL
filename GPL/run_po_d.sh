@@ -8,9 +8,10 @@
 #SBATCH --error=logs/%x_%j.err
 # Parse inputs
 
+
 ENV_NAME=$1
-NUM_PARTICLES=$2
-EXP_NAME=$3
+EXP_NAME=$2
+NUM_PARTICLES=$3
 LOGGING_DIR=$4
 SAVING_DIR=$5
 
