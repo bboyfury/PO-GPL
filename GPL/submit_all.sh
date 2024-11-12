@@ -28,9 +28,9 @@ for env in "${environments[@]}"; do
             ;;
     esac
 
-    for exp in "${exp_names[@]}"; do
-        for particles in "${num_particles[@]}"; do
-            
+    for particles in "${num_particles[@]}"; do
+        for exp in "${exp_names[@]}"; do
+                
             # Set dynamic saving and logging directories
             bash_file_name=$(basename "$0" .sh)         # Get the name of the current script without .sh
             saving_dir="param_${env_base_name}_run_po_${particles}"
@@ -43,8 +43,15 @@ for env in "${environments[@]}"; do
             saving_dir="param_${env_base_name}_run_vae_d_${particles}"
             logging_dir="logs_${env_base_name}_run_vae_d_${particles}"
             sbatch --job-name="${env_base_name}_${exp}_${particles}_vae" run_vae_d.sh "$env" "$exp" "$particles" "$logging_dir" "$saving_dir"
-        
         done
+    done
+
+
+    for exp in "${exp_names[@]}"; do
+            
+        # Set dynamic saving and logging directories
+        bash_file_name=$(basename "$0" .sh)         # Get the name of the current script without .sh
+        
         saving_dir="param_${env_base_name}_run_gpl_d"
         logging_dir="logs_${env_base_name}_run_gpl_d"
         # Submit jobs that don’t use particle parameters
@@ -53,4 +60,5 @@ for env in "${environments[@]}"; do
         logging_dir="logs_${env_base_name}_run_ae_d"
         sbatch --job-name="${env_base_name}_${exp}_ae" run_ae_d.sh "$env" "$exp" "$logging_dir" "$saving_dir"
     done
+    
 done
