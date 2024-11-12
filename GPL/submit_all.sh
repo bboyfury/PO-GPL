@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define environments and parameters
-# environments=("PO-Adhoc-Foraging-2-12x12-3f-v0" "Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1" "fortattack-v0")
-environments=("Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1" "fortattack-v0")
+environments=("PO-Adhoc-Foraging-2-12x12-3f-v0" "Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1")
+# environments=("Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1" "fortattack-v0")
 exp_names=("exp_1" "exp_2" "exp_3" "exp_4" "exp_5" "exp_6" "exp_7" "exp_8")
 num_particles=("1" "5" "10" "20")
 
@@ -27,7 +27,7 @@ for env in "${environments[@]}"; do
             env_base_name=$(echo $env | sed 's/-/_/g')  # Fallback if a new environment is added
             ;;
     esac
-
+    #I used separate loops for debugging purposes
     for particles in "${num_particles[@]}"; do
         for exp in "${exp_names[@]}"; do
                 
