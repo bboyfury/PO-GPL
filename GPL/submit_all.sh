@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Define environments and parameters
-environments=("PO-Adhoc-Foraging-2-12x12-3f-v0" "Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1" "fortattack-v0")
+# environments=("PO-Adhoc-Foraging-2-12x12-3f-v0" "Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1" "fortattack-v0")
+environments=("Adhoc-wolfpack-v5" "PO-Navigation-2-12x12-v1" "fortattack-v0")
 exp_names=("exp_1" "exp_2" "exp_3" "exp_4" "exp_5" "exp_6" "exp_7" "exp_8")
 num_particles=("1" "5" "10" "20")
 
