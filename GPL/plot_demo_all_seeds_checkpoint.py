@@ -87,10 +87,10 @@ def plot_me(algorithm_name_list, legend, title, ylabel, fig_name, buff_to_load, 
 
 # Select the algorithms you want to plot this way: 
 # Define the labels
-legend = ["VAE-GPL", "AE-GPL", "GPL-Q", "PF-GPL-10"] 
+legend = ["VAE-GPL-1","VAE-GPL-5","VAE-GPL-10","VAE-GPL-20", "AE-GPL", "GPL-Q", "PF-GPL-1", "PF-GPL-5", "PF-GPL-10", "PF-GPL-20"] 
 # and the folder name
-algorithm_name = ["VAE", "AE", "GPL" , "PF-GPL-10" ] 
-
+# algorithm_name = ["VAE", "AE", "GPL" , "PF-GPL-10" ] 
+algorithm_name = ["param_LBF_run_vae_d_1", "param_LBF_run_vae_d_5","param_LBF_run_vae_d_10","param_LBF_run_vae_d_20","param_LBF_run_ae_d", "param_LBF_run_gpl_d" , "param_LBF_run_po_1", "param_LBF_run_po_5", "param_LBF_run_po_10", "param_LBF_run_po_20" ] 
 
 # In the paper we used: 
 # legend = ["VAE-GPL","AE-GPL",  "GPL-Q", "PF-GPL-20", "PF-GPL-10", "PF-GPL-5", "PF-GPL-1" ] 

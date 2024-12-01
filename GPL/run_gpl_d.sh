@@ -1,29 +1,35 @@
-#!/bin/bash
+initialize_environment(curriculum_stage)
+initialize_agents()
+initialize_central_critic()
 
-#SBATCH --cpus-per-task=4
-#SBATCH --time=6-12:00:00
-#SBATCH --mem-per-cpu=4G
-#SBATCH --gres=gpu:1
+for episode in range(total_episodes):
+    env.reset(curriculum_stage)
+    agent_states = env.get_initial_states()
+    agent_types = initialize_agent_types(agent_states)
+    done = False
 
-#SBATCH --output=logs/%x_%j.out
-#SBATCH --error=logs/%x_%j.err
+    while not done:
+        observations = {id: env.observe(id) for id in agent_states}
 
+        for id in agent_states:
+            if USE_CPD and check_type_change(id, observations[id]):
+                agent_types[id] = infer_type(id, observations[id])
+            elif not USE_CPD:
+                agent_types[id] = infer_type(id, observations[id])
 
-ENV_NAME=$1
-EXP_NAME=$2
-LOGGING_DIR=$3
-SAVING_DIR=$4
+        joint_action_values = central_critic.evaluate(observations, agent_types)
+        joint_actions = {id: select_action(id, joint_action_values) for id in agent_states}
 
-source activate myenv
+        env.execute(joint_actions)
+        env.update()
+        rewards = env.get_rewards(joint_actions)
 
-export OMP_NUM_THREADS=1
+        for id in agent_states:
+            update_policy(id, observations[id], agent_types[id], joint_actions[id], rewards[id])
+        central_critic.update(observations, agent_types, joint_actions, rewards)
 
-#export CUDA_VISIBLE_DEVICES="4"
+        agent_states = env.get_current_states()
+        done = env.check_termination()
 
-
-
-python gpl_only_train.py --lr=0.00025 --env-name="$ENV_NAME" \
-    --google-cloud="False" --designated-cuda="cuda:0" \
-    --seed=2 --eval-seed=700 \
-	--q-loss-weight=1.0 --act-reconstruction-weight=0.05 --lrf-rank=6  \
-	--exp-name="$ENV_NAME" --logging-dir="$LOGGING_DIR" --saving-dir="$SAVING_DIR" 
+    if USE_CURRICULUM_LEARNING:
+        curriculum_stage = adjust_curriculum(curriculum_stage)
