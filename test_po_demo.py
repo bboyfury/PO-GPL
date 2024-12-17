@@ -1,5 +1,4 @@
 import argparse
-import csv
 import gym
 import random
 import lbforaging
@@ -140,17 +139,7 @@ parser.add_argument('--verbose', type=bool, default=False, help="Print in screen
 
 
 args = parser.parse_args()
-def write_rewards_to_csv(filename, rewards, environment_name):
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        # Open the CSV file for writing
-        with open(filename, mode='w', newline='') as csv_file:
-            writer = csv.writer(csv_file)
-            # Write the header
-            writer.writerow(["Episode", "Environment", "Reward"])
-    
-            # Write rewards for each episode
-            for episode, reward in enumerate(rewards):
-                writer.writerow([episode, environment_name, reward])
+
 
 class ModelTraining(object):
     def __init__(self, config):
@@ -497,9 +486,7 @@ class ModelTraining(object):
             ]
 
         return acts
-    
 
-                
     def eval_policy_performance(self, action_shape, model, cg_model, logger, logging_id):
 
         # Create env for policy eval
@@ -546,7 +533,6 @@ class ModelTraining(object):
             "other_actions": torch.zeros([batch_size, agent_nums - 1, action_shape]).double().to(device),
             "current_state": torch.tensor(test_states).double().to(device)
         }
-        episode_rewards = []
 
         while (any([k < self.config["num_eval_episodes"] for k in num_dones])):
             # Decide agent's action based on model
@@ -610,14 +596,13 @@ class ModelTraining(object):
                     if num_dones[idx] < self.config['num_eval_episodes']:
                         num_dones[idx] += 1
                         avgs.append(per_worker_rew[idx])
-                        episode_rewards.append(per_worker_rew[idx])
                     per_worker_rew[idx] = 0
 
         avg_total_rewards = (sum(avgs) + 0.0) / len(avgs)
         # print("Finished train with rewards " + str(avg_total_rewards))
         env_train.close()
         logger.add_scalar('Rewards/train_set', sum(avgs) / len(avgs), logging_id)
-        write_rewards_to_csv("Average_reward_per_Episode", episode_rewards, self.config["env_name"])
+
         env_eval = gym.vector.SyncVectorEnv([
             make_env(
                 self.config["env_name"], seed=100 * idx + self.config["eval_seed"], env_kwargs=self.env_kwargs_eval

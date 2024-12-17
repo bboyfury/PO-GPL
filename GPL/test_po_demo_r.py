@@ -1,5 +1,6 @@
 import argparse
 import csv
+import time
 import gym
 import random
 import lbforaging
@@ -30,6 +31,29 @@ from render import Visualizer
 import imageio
 parser = argparse.ArgumentParser()
 
+
+# time is unix = time.time()
+# step is int or string
+# value is float
+def write_rewards_to_csv(file_path,env,time,exp_name, step, value):
+    # Ensure the directory for the CSV file exists
+    # file_path = 'gpl_average_training_return_per_episode.csv'
+    directory = os.path.dirname(file_path)
+    
+    # Create the directory only if it exists in the path
+    if directory:  
+        os.makedirs(directory, exist_ok=True)
+    
+    # Open the CSV file for appending
+    with open(file_path, mode='a', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        
+        # Check if the file is empty and write the header if needed
+        if csv_file.tell() == 0:
+            writer.writerow(["Unix Time","Env","Experiment", "Step", "Value"])
+        
+        # Write the row
+        writer.writerow([time,env,exp_name, step, value])
 # Experiment logistics
 parser.add_argument('--exp-name', type=str, default="exp1", help="Experiment name.")
 parser.add_argument('--logging-dir', type=str, default="logs1_debug", help="Tensorboard logging directory")
@@ -138,19 +162,7 @@ parser.add_argument('--wolfpack-constant', type=int, default=8, help="Removes th
 parser.add_argument('--main-sight-radius', type=int, default=3, help="Sight radious of woflpack")
 parser.add_argument('--verbose', type=bool, default=False, help="Print in screen or not")
 
-
 args = parser.parse_args()
-def write_rewards_to_csv(filename, rewards, environment_name):
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        # Open the CSV file for writing
-        with open(filename, mode='w', newline='') as csv_file:
-            writer = csv.writer(csv_file)
-            # Write the header
-            writer.writerow(["Episode", "Environment", "Reward"])
-    
-            # Write rewards for each episode
-            for episode, reward in enumerate(rewards):
-                writer.writerow([episode, environment_name, reward])
 
 class ModelTraining(object):
     def __init__(self, config):
@@ -614,10 +626,11 @@ class ModelTraining(object):
                     per_worker_rew[idx] = 0
 
         avg_total_rewards = (sum(avgs) + 0.0) / len(avgs)
-        # print("Finished train with rewards " + str(avg_total_rewards))
+        print("Finished train with rewards " + str(avg_total_rewards))
         env_train.close()
         logger.add_scalar('Rewards/train_set', sum(avgs) / len(avgs), logging_id)
-        write_rewards_to_csv("Average_reward_per_Episode", episode_rewards, self.config["env_name"])
+        write_rewards_to_csv(f"train_average_return_po_gpl-{self.config['num_particles']}.csv",self.config["env_name"],time.time(),self.config["exp_name"],self.config["load_from_checkpoint"],sum(avgs) / len(avgs))
+
         env_eval = gym.vector.SyncVectorEnv([
             make_env(
                 self.config["env_name"], seed=100 * idx + self.config["eval_seed"], env_kwargs=self.env_kwargs_eval
@@ -717,10 +730,11 @@ class ModelTraining(object):
                     per_worker_rew[idx] = 0
 
         avg_total_rewards = (sum(avgs) + 0.0) / len(avgs)
-        # print("Finished eval with rewards " + str(avg_total_rewards))
+        print("Finished eval with rewards " + str(avg_total_rewards))
         env_eval.close()
         logger.add_scalar('Rewards/eval_set', sum(avgs) / len(avgs), logging_id)
-    
+        write_rewards_to_csv(f"eval_average_return_po_gpl-{self.config['num_particles']}.csv",self.config["env_name"],time.time(),self.config["exp_name"],self.config["load_from_checkpoint"],sum(avgs) / len(avgs))
+
     def evaluate_demo_episode(self, action_shape, model, cg_model, true_state_directory):
         """
         This function loads an episode and evaluates the inference model over that recorded episode. 
@@ -1470,7 +1484,9 @@ class ModelTraining(object):
 
         # print("evaluating episode")
         # Then evaluate policy in the demo episode
-        self.evaluate_demo_episode(action_shape, model, cg_model, directory)
+        self.eval_policy_performance(action_shape, model, cg_model, writer, 0)
+
+        # self.evaluate_demo_episode(action_shape, model, cg_model, directory)
 
        
 
